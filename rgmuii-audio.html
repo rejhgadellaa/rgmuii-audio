@@ -8,18 +8,23 @@
       :host {
         display: none;
       }
-      :host[controls] {
+      :host([controls]) {
         display: block;
         width: 100%;
         height: 56px;
+      }
+      audio {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
       }
     </style>
 
     <audio
       id="audio"
       autoplay="[[autoplay]]"
-      x-controls="[[controls]]"
-      controls
+      controls="[[controls]]"
       loop="[[loop]]"
       muted="[[muted]]"
       preload="[[preload]]"
@@ -101,28 +106,48 @@
         
         super();
         
-        //this._isPlaying = false;
-        //this._isBusy = false;
-        
       }
 
       connectedCallback() {
 
         super.connectedCallback();
+        if (this.debug) console.log("rgmuii-audio.connectedCallback()");
 
-        this.$.audio.addEventListener("abort", this._onAbort);
-        this.$.audio.addEventListener("canplay", this._onCanPlay);
-        this.$.audio.addEventListener("canplaythrough", this._onCanPlayThrough);
-        this.$.audio.addEventListener("ended", this._onEnded);
-        this.$.audio.addEventListener("error", this._onError);
-        this.$.audio.addEventListener("loadedmetadata", this._onLoadedMetadata);
-        this.$.audio.addEventListener("loadstart", this._onLoadStart);
-        this.$.audio.addEventListener("pause", this._onPause);
-        this.$.audio.addEventListener("playing", this._onPlaying);
-        this.$.audio.addEventListener("progress", this._onProgress);
-        this.$.audio.addEventListener("seeking", this._onSeeking);
-        this.$.audio.addEventListener("seeked", this._onSeeked);
+        this.$.audio.addEventListener("abort", this._onAbort.bind(this));
+        this.$.audio.addEventListener("canplay", this._onCanPlay.bind(this));
+        this.$.audio.addEventListener("canplaythrough", this._onCanPlayThrough.bind(this));
+        this.$.audio.addEventListener("ended", this._onEnded.bind(this));
+        this.$.audio.addEventListener("error", this._onError.bind(this));
+        this.$.audio.addEventListener("loadedmetadata", this._onLoadedMetadata.bind(this));
+        this.$.audio.addEventListener("loadstart", this._onLoadStart.bind(this));
+        this.$.audio.addEventListener("pause", this._onPause.bind(this));
+        this.$.audio.addEventListener("playing", this._onPlaying.bind(this));
+        this.$.audio.addEventListener("progress", this._onProgress.bind(this));
+        this.$.audio.addEventListener("seeking", this._onSeeking.bind(this));
+        this.$.audio.addEventListener("seeked", this._onSeeked.bind(this));
+        this.$.audio.addEventListener("waiting", this._onWaiting.bind(this));
 
+      }
+      
+      disconnectedCallback() {
+        
+        super.disconnectedCallback();
+        if (this.debug) console.log("rgmuii-audio.disconnectedCallback()");
+        
+        this.$.audio.removeEventListener("abort", this._onAbort);
+        this.$.audio.removeEventListener("canplay", this._onCanPlay);
+        this.$.audio.removeEventListener("canplaythrough", this._onCanPlayThrough);
+        this.$.audio.removeEventListener("ended", this._onEnded);
+        this.$.audio.removeEventListener("error", this._onError);
+        this.$.audio.removeEventListener("loadedmetadata", this._onLoadedMetadata);
+        this.$.audio.removeEventListener("loadstart", this._onLoadStart);
+        this.$.audio.removeEventListener("pause", this._onPause);
+        this.$.audio.removeEventListener("playing", this._onPlaying);
+        this.$.audio.removeEventListener("progress", this._onProgress);
+        this.$.audio.removeEventListener("seeking", this._onSeeking);
+        this.$.audio.removeEventListener("seeked", this._onSeeked);
+        this.$.audio.removeEventListener("waiting", this._onWaiting);
+        
       }
 
       // ================================
@@ -229,7 +254,8 @@
 
       _onLoadStart(event) {
         if (this.debug) console.log("rgmuii-audio._onLoadStart()");
-        this._isBusy  = true;
+        this._isPlaying = true;
+        this._isBusy = true;
       }
 
       _onPause(event) {
@@ -250,11 +276,18 @@
       
       _onSeeked(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeked()");
+        this._isPlaying = false;
         this._isBusy = true;
       }
       
       _onSeeking(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeking()");
+      }
+      
+      _onWaiting(event) {
+        if (this.debug) console.log("rgmuii-audio._onWaiting()");
+        this._isPlaying = false;
+        this._isBusy = true;
       }
 
     }
