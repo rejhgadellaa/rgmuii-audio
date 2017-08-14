@@ -1,6 +1,6 @@
 {
   "name": "rgmuii-audio",
-  "description": "A wrapper around the html audio element",
+  "description": "A Polymer wrapper around the html audio element",
   "main": "rgmuii-audio.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0"
