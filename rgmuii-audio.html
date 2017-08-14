@@ -6,7 +6,7 @@
 
     <style>
       :host {
-        
+        display: none;
       }
       :host[controls] {
         display: block;
@@ -129,6 +129,14 @@
         if (this.debug) console.log("rgmuii-audio.pause()");
         if (this._isPlaying) this.$.audio.pause();
       }
+      
+      rewind30() {
+        _seek(-1,-30);
+      }
+      
+      forward30() {
+        _seek(-1,30);
+      }
 
       togglePlayPause() {
         if (this.debug) console.log("rgmuii-audio.togglePlayPause()");
@@ -139,13 +147,17 @@
       stop() {
         if (this.debug) console.log("rgmuii-audio.stop()");
       }
-
-      startBuffer() {
-        if (this.debug) console.log("rgmuii-audio.startBuffer()");
-      }
-
-      stopBuffer() {
-        if (this.debug) console.log("rgmuii-audio.stopBuffer()");
+      
+      // ================================
+      // PRIVATE: METHODS
+      
+      _seek(goto, add=0) {
+        if (goto<0) { goto =  this.$.audio.currentTime; }
+        var duration = this.$.audio.duration;
+        goto += add;
+        if (goto > duration) { goto = duration; }
+        else if (goto < 0) { goto = 0; }
+        this.$.audio.currentTime = goto;
       }
 
       // ================================
@@ -204,7 +216,7 @@
       }
 
       _onLoadedMetadata(event) {
-        if (this.debug) console.log("rgmuii-audio._onLoadedMetadata(): ", event);
+        if (this.debug) console.log("rgmuii-audio._onLoadedMetadata()");
       }
 
       _onLoadStart(event) {
@@ -227,7 +239,6 @@
       _onProgress(event) {
         if (this.debug) console.log("rgmuii-audio._onProgress()");
       }
-
 
     }
     window.customElements.define(RgmuiiAudio.is, RgmuiiAudio);
