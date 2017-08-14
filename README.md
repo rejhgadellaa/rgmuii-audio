@@ -1,6 +1,6 @@
 # \<rgmuii-audio\>
 
-A wrapper around the html audio element
+A Polymer wrapper around the html audio element
 
 ## Install the Polymer-CLI
 
