@@ -18,7 +18,8 @@
     <audio
       id="audio"
       autoplay="[[autoplay]]"
-      controls="[[controls]]"
+      x-controls="[[controls]]"
+      controls
       loop="[[loop]]"
       muted="[[muted]]"
       preload="[[preload]]"
@@ -80,15 +81,15 @@
             reflectToAttribute: true,
             value: false,
           },
-
-          _isBuffering: {
-            type: Boolean,
-            value: false,
-          },
+          
           _isPlaying: {
             type: Boolean,
             value: false,
           },
+          _isBusy: {
+            type: Boolean,
+            value: false,
+          }
 
         };
       }
@@ -97,23 +98,30 @@
       // LIFECYCLE
 
       constructor() {
+        
         super();
+        
+        //this._isPlaying = false;
+        //this._isBusy = false;
+        
       }
 
       connectedCallback() {
 
         super.connectedCallback();
 
-        this.$.audio.addEventListener("abort", this._onAbort.bind(this));
-        this.$.audio.addEventListener("canplay", this._onCanPlay.bind(this));
-        this.$.audio.addEventListener("canplaythrough", this._onCanPlayThrough.bind(this));
-        this.$.audio.addEventListener("ended", this._onEnded.bind(this));
-        this.$.audio.addEventListener("error", this._onError.bind(this));
-        this.$.audio.addEventListener("loadedmetadata", this._onLoadedMetadata.bind(this));
-        this.$.audio.addEventListener("loadstart", this._onLoadStart.bind(this));
-        this.$.audio.addEventListener("pause", this._onPause.bind(this));
-        this.$.audio.addEventListener("playing", this._onPlaying.bind(this));
-        this.$.audio.addEventListener("progress", this._onProgress.bind(this));
+        this.$.audio.addEventListener("abort", this._onAbort);
+        this.$.audio.addEventListener("canplay", this._onCanPlay);
+        this.$.audio.addEventListener("canplaythrough", this._onCanPlayThrough);
+        this.$.audio.addEventListener("ended", this._onEnded);
+        this.$.audio.addEventListener("error", this._onError);
+        this.$.audio.addEventListener("loadedmetadata", this._onLoadedMetadata);
+        this.$.audio.addEventListener("loadstart", this._onLoadStart);
+        this.$.audio.addEventListener("pause", this._onPause);
+        this.$.audio.addEventListener("playing", this._onPlaying);
+        this.$.audio.addEventListener("progress", this._onProgress);
+        this.$.audio.addEventListener("seeking", this._onSeeking);
+        this.$.audio.addEventListener("seeked", this._onSeeked);
 
       }
 
@@ -172,7 +180,7 @@
 
       _onAbort(event) {
         if (this.debug) console.log("rgmuii-audio._onAbort()");
-        this._isBuffering = false;
+        this._isBusy = false;
         this._isPlaying = false;
       }
 
@@ -186,14 +194,14 @@
 
       _onEnded(event) {
         if (this.debug) console.log("rgmuii-audio._onEnded()");
-        this._isBuffering = false;
+        this._isBusy = false;
         this._isPlaying = false;
       }
 
       _onError(event) {
 
         if (this.debug) console.warn("rgmuii-audio._onError()");
-        this._isBuffering = false;
+        this._isBusy = false;
         this._isPlaying = false;
 
         var error = "UNKNOWN";
@@ -221,23 +229,32 @@
 
       _onLoadStart(event) {
         if (this.debug) console.log("rgmuii-audio._onLoadStart()");
-        this._isBuffering  = true;
+        this._isBusy  = true;
       }
 
       _onPause(event) {
         if (this.debug) console.log("rgmuii-audio._onPause()");
-        this._isBuffering = false;
+        this._isBusy = false;
         this._isPlaying = false;
       }
 
       _onPlaying(event) {
         if (this.debug) console.log("rgmuii-audio._onPlaying()");
-        this._isBuffering = false;
+        this._isBusy = false;
         this._isPlaying = true;
       }
 
       _onProgress(event) {
         if (this.debug) console.log("rgmuii-audio._onProgress()");
+      }
+      
+      _onSeeked(event) {
+        if (this.debug) console.log("rgmuii-audio._onSeeked()");
+        this._isBusy = true;
+      }
+      
+      _onSeeking(event) {
+        if (this.debug) console.log("rgmuii-audio._onSeeking()");
       }
 
     }
