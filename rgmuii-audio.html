@@ -1,0 +1,228 @@
+<link rel="import" href="../polymer/polymer-element.html">
+
+<dom-module id="rgmuii-audio">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+        height: 56px;
+      }
+    </style>
+
+    <audio
+      id="audio"
+      autoplay="[[autoplay]]"
+      loop="[[loop]]"
+      muted="[[muted]]"
+      preload="[[preload]]"
+      data-src="{{source}}"
+      >
+    </audio>
+
+  </template>
+
+  <script>
+
+    /**
+     * `rgmuii-audio`
+     * A wrapper around the html audio element
+     * https://developer.mozilla.org/en/docs/Web/Guide/Events/Media_events
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class RgmuiiAudio extends Polymer.Element {
+
+      static get is() { return 'rgmuii-audio'; }
+
+      static get properties() {
+        return {
+
+          autoplay: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+          },
+          loop: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+          },
+          muted: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+          },
+          preload: {
+            type: String,
+            reflectToAttribute: true,
+            value: 'metadata',
+          },
+          dataSource: {
+            type: String,
+            observer: '_dataSourceChanged',
+          },
+          debug: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+          },
+
+          _isBuffering: {
+            type: Boolean,
+            value: false,
+          },
+          _isPlaying: {
+            type: Boolean,
+            value: false,
+          },
+
+        };
+      }
+
+      // ================================
+      // LIFECYCLE
+
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+
+        super.connectedCallback();
+
+        this.$.audio.addEventListener("abort", this._onAbort.bind(this));
+        this.$.audio.addEventListener("canplay", this._onCanPlay.bind(this));
+        this.$.audio.addEventListener("canplaythrough", this._onCanPlayThrough.bind(this));
+        this.$.audio.addEventListener("ended", this._onEnded.bind(this));
+        this.$.audio.addEventListener("error", this._onError.bind(this));
+        this.$.audio.addEventListener("loadedmetadata", this._onLoadedMetadata.bind(this));
+        this.$.audio.addEventListener("loadstart", this._onLoadStart.bind(this));
+        this.$.audio.addEventListener("pause", this._onPause.bind(this));
+        this.$.audio.addEventListener("playing", this._onPlaying.bind(this));
+        this.$.audio.addEventListener("progress", this._onProgress.bind(this));
+
+      }
+
+      // ================================
+      // PUBLIC METHODS
+
+      play() {
+        if (this.debug) console.log("rgmuii-audio.play()");
+        if (!this._isPlaying) this.$.audio.play();
+      }
+
+      pause() {
+        if (this.debug) console.log("rgmuii-audio.pause()");
+        if (this._isPlaying) this.$.audio.pause();
+      }
+
+      togglePlayPause() {
+        if (this.debug) console.log("rgmuii-audio.togglePlayPause()");
+        if (this._isPlaying) this.pause();
+        else this.play();
+      }
+
+      stop() {
+        if (this.debug) console.log("rgmuii-audio.stop()");
+      }
+
+      startBuffer() {
+        if (this.debug) console.log("rgmuii-audio.startBuffer()");
+      }
+
+      stopBuffer() {
+        if (this.debug) console.log("rgmuii-audio.stopBuffer()");
+      }
+
+      // ================================
+      // PRIVATE: PROPERTY OBSERVERS
+
+      _dataSourceChanged(source, oldSource) {
+        this.$.audio.src = source;
+      }
+
+      // ================================
+      // AUDIO EVENTS
+
+      _onAbort(event) {
+        if (this.debug) console.log("rgmuii-audio._onAbort()");
+        this._isBuffering = false;
+        this._isPlaying = false;
+      }
+
+      _onCanPlay(event) {
+        if (this.debug) console.log("rgmuii-audio._onCanPlay()");
+      }
+
+      _onCanPlayThrough(event) {
+        if (this.debug) console.log("rgmuii-audio._onCanPlayThrough()");
+      }
+
+      _onEnded(event) {
+        if (this.debug) console.log("rgmuii-audio._onEnded()");
+        this._isBuffering = false;
+        this._isPlaying = false;
+      }
+
+      _onError(event) {
+
+        if (this.debug) console.warn("rgmuii-audio._onError()");
+        this._isBuffering = false;
+        this._isPlaying = false;
+
+        var error = "UNKNOWN";
+        switch(event.currentTarget.error.code) {
+            case 1:
+                error = "MEDIA_ERR_ABORTED";
+                break;
+            case 2:
+                error = "MEDIA_ERR_NETWORK";
+                break;
+            case 3:
+                error = "MEDIA_ERR_DECODE";
+                break;
+            case 4:
+                error = "MEDIA_ERR_SRC_NOT_SUPPORTED";
+                break;
+        }
+        if (this.debug) console.warn(" -> "+ error);
+
+      }
+
+      _onLoadedMetadata(event) {
+        if (this.debug) console.log("rgmuii-audio._onLoadedMetadata(): ", event);
+      }
+
+      _onLoadStart(event) {
+        if (this.debug) console.log("rgmuii-audio._onLoadStart()");
+        this._isBuffering  = true;
+      }
+
+      _onPause(event) {
+        if (this.debug) console.log("rgmuii-audio._onPause()");
+        this._isBuffering = false;
+        this._isPlaying = false;
+      }
+
+      _onPlaying(event) {
+        if (this.debug) console.log("rgmuii-audio._onPlaying()");
+        this._isBuffering = false;
+        this._isPlaying = true;
+      }
+
+      _onProgress(event) {
+        if (this.debug) console.log("rgmuii-audio._onProgress()");
+      }
+
+
+    }
+    window.customElements.define(RgmuiiAudio.is, RgmuiiAudio);
+
+  </script>
+
+</dom-module>
