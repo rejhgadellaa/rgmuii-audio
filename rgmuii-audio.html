@@ -28,7 +28,7 @@
       loop="[[loop]]"
       muted="[[muted]]"
       preload="[[preload]]"
-      data-src="{{source}}"
+      src="[[src]]"
       >
     </audio>
 
@@ -51,6 +51,12 @@
 
       static get properties() {
         return {
+
+          debug: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+          },
 
           autoplay: {
             type: Boolean,
@@ -77,18 +83,21 @@
             reflectToAttribute: true,
             value: 'metadata',
           },
-          
-          debug: {
+          src: {
+            type: String,
+            reflectToAttribute: true,
+            value: "",
+          },
+
+          fade: {
             type: Boolean,
             reflectToAttribute: true,
             value: false,
           },
-          
-          dataSource: {
-            type: String,
-            observer: '_dataSourceChanged',
+          fadeTime: {
+            type: Number,
+            value: 2.5,
           },
-          
 
         };
       }
@@ -97,14 +106,12 @@
       // LIFECYCLE
 
       constructor() {
-        
+
         super();
-        
+
         this._isBusy = false;
         this._isPlaying = false;
-        
-        this._isFading = false;
-        
+
       }
 
       connectedCallback() {
@@ -127,12 +134,12 @@
         this.$.audio.addEventListener("waiting", this._onWaiting.bind(this));
 
       }
-      
+
       disconnectedCallback() {
-        
+
         super.disconnectedCallback();
         if (this.debug) console.log("rgmuii-audio.disconnectedCallback()");
-        
+
         this.$.audio.removeEventListener("abort", this._onAbort);
         this.$.audio.removeEventListener("canplay", this._onCanPlay);
         this.$.audio.removeEventListener("canplaythrough", this._onCanPlayThrough);
@@ -146,7 +153,7 @@
         this.$.audio.removeEventListener("seeking", this._onSeeking);
         this.$.audio.removeEventListener("seeked", this._onSeeked);
         this.$.audio.removeEventListener("waiting", this._onWaiting);
-        
+
       }
 
       // ================================
@@ -161,14 +168,6 @@
         if (this.debug) console.log("rgmuii-audio.pause()");
         if (this._isPlaying) this.$.audio.pause();
       }
-      
-      rewind30() {
-        this._seek(-1,-30);
-      }
-      
-      forward30() {
-        this._seek(-1,30);
-      }
 
       togglePlayPause() {
         if (this.debug) console.log("rgmuii-audio.togglePlayPause()");
@@ -179,10 +178,28 @@
       stop() {
         if (this.debug) console.log("rgmuii-audio.stop()");
       }
-      
+
+      rewind30() {
+        this._seek(-1,-30);
+      }
+
+      forward30() {
+        this._seek(-1,30);
+      }
+
+      fadeIn(fadeTime=this.fadeTime) {
+        if (this.debug) console.log("rgmuii-audio.fadeIn(): "+ fadeTime);
+        this._fade(fadeTime, 1, 0);
+      }
+
+      fadeOut(fadeTime=this.fadeTime) {
+        if (this.debug) console.log("rgmuii-audio.fadeOut(): "+ fadeTime);
+        this._fade(fadeTime, 0, 1);
+      }
+
       // ================================
       // PRIVATE: METHODS
-      
+
       _seek(goto, add=0) {
         if (goto<0) { goto =  this.$.audio.currentTime; }
         var duration = this.$.audio.duration;
@@ -191,53 +208,56 @@
         else if (goto < 0) { goto = 0; }
         this.$.audio.currentTime = goto;
       }
-      
-      _fade(timeToFade, valueEnd, valueBgn=0) {
-        
+
+      _fade(timeToFadeSeconds, valueEnd, valueBgn=0) {
+
+        var timeToFadeMs = timeToFadeSeconds*1000;
         var timeBgn = new Date().getTime();
-        var timeEnd = timeBgn + timeToFade;
-        
-        this.$.audio.volume = valueBgn;
-        
+        var timeEnd = timeBgn + timeToFadeMs;
+
+        if (!valueBgn && valueBgn !== 0) {
+          valueBgn = this.$.audio.volume;
+        } else {
+          this.$.audio.volume = valueBgn;
+        }
+
         var __loop = function() {
-          
+
           var timeNow = new Date().getTime();
           var timeDiff = timeNow - timeBgn;
-          var progress = this._easeInOutQuad(timeDiff / timeToFade);
+          var progress = timeDiff / timeToFadeMs;
           var val = (valueEnd - valueBgn) * progress;
-          
+
           if (
             !this._isPlaying
-            || valueBgn < valueEnd && val > valueEnd 
+            || valueBgn < valueEnd && val > valueEnd
             || valueBgn > valueEnd && val < valueEnd
-          ) { 
+          ) {
               progress = 1.0;
               val = valueEnd;
           }
-          
-          this.$.audio.volume = val;
-          
-          if (progress < 1.0) { 
+
+          this.$.audio.volume = this._easeInOutQuad(val);
+
+          if (progress < 1.0) {
             requestAnimationFrame(__loop);
           }
-          
+
         }.bind(this);
-        
+
         __loop();
-        
+
       }
-      
+
       _easeInOutQuad (t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t };
       _easeInOutQuart(t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t }
-      
-      
+
+
 
       // ================================
       // PRIVATE: PROPERTY OBSERVERS
 
-      _dataSourceChanged(source, oldSource) {
-        this.$.audio.src = source;
-      }
+      // ..
 
       // ================================
       // AUDIO EVENTS
@@ -307,23 +327,23 @@
         if (this.debug) console.log("rgmuii-audio._onPlaying()");
         this._isBusy = false;
         this._isPlaying = true;
-        this._fade(1000*2.5,1,0);
+        if (this.fade) { this.fadeIn(); }
       }
 
       _onProgress(event) {
         if (this.debug) console.log("rgmuii-audio._onProgress()");
       }
-      
+
       _onSeeked(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeked()");
         this._isPlaying = false;
         this._isBusy = true;
       }
-      
+
       _onSeeking(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeking()");
       }
-      
+
       _onWaiting(event) {
         if (this.debug) console.log("rgmuii-audio._onWaiting()");
         this._isPlaying = false;
