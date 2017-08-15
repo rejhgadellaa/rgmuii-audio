@@ -99,8 +99,22 @@
             value: 2.5,
           },
 
+          state: {
+            type: String,
+            notify: true,
+            reflectToAttribute: true,
+            value: -99,
+          },
+
         };
       }
+
+      static get STATE_UNKNOWN() { return -99; }
+      static get STATE_ERROR() { return -1; }
+      static get STATE_STOPPED() { return -0; }
+      static get STATE_PAUSED() { return -1; }
+      static get STATE_BUSY() { return -2; }
+      static get STATE_PLAYING() { return -3; }
 
       // ================================
       // LIFECYCLE
@@ -266,6 +280,7 @@
         if (this.debug) console.log("rgmuii-audio._onAbort()");
         this._isBusy = false;
         this._isPlaying = false;
+        this.state = this.STATE_STOPPED;
       }
 
       _onCanPlay(event) {
@@ -280,6 +295,7 @@
         if (this.debug) console.log("rgmuii-audio._onEnded()");
         this._isBusy = false;
         this._isPlaying = false;
+        this.state = this.STATE_STOPPED;
       }
 
       _onError(event) {
@@ -287,6 +303,7 @@
         if (this.debug) console.warn("rgmuii-audio._onError()");
         this._isBusy = false;
         this._isPlaying = false;
+        this.state = this.STATE_ERROR;
 
         var error = "UNKNOWN";
         switch(event.currentTarget.error.code) {
@@ -315,18 +332,21 @@
         if (this.debug) console.log("rgmuii-audio._onLoadStart()");
         this._isPlaying = false;
         this._isBusy = true;
+        this.state = this.STATE_BUSY;
       }
 
       _onPause(event) {
         if (this.debug) console.log("rgmuii-audio._onPause()");
         this._isBusy = false;
         this._isPlaying = false;
+        this.state = this.STATE_PAUSED;
       }
 
       _onPlaying(event) {
         if (this.debug) console.log("rgmuii-audio._onPlaying()");
         this._isBusy = false;
         this._isPlaying = true;
+        this.state = this.STATE_PLAYING;
         if (this.fade) { this.fadeIn(); }
       }
 
@@ -337,17 +357,21 @@
       _onSeeked(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeked()");
         this._isPlaying = false;
-        this._isBusy = true;
+        this._isBusy = false;
       }
 
       _onSeeking(event) {
         if (this.debug) console.log("rgmuii-audio._onSeeking()");
+        this._isPlaying = false;
+        this._isBusy = true;
+        this.state = this.STATE_BUSY;
       }
 
       _onWaiting(event) {
         if (this.debug) console.log("rgmuii-audio._onWaiting()");
         this._isPlaying = false;
         this._isBusy = true;
+        this.state = this.STATE_BUSY;
       }
 
     }
