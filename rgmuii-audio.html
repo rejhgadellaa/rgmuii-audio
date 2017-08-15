@@ -334,8 +334,8 @@
       _onLoadStart(event) {
         if (this.debug) console.log("rgmuii-audio._onLoadStart()");
         this._isPlaying = false;
-        this._isBusy = true;
-        this.state = this.STATE_BUSY;
+        this._isBusy = false;
+        //this.state = this.STATE_BUSY;
       }
 
       _onPause(event) {
