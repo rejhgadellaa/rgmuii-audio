@@ -104,6 +104,7 @@
             readOnly: true,
             notify: true,
             reflectToAttribute: true,
+            observer: "_onStateChange",
             value: -99,
           },
 
@@ -272,7 +273,9 @@
       // ================================
       // PRIVATE: PROPERTY OBSERVERS
 
-      // ..
+      _onStateChange(state, oldState) {
+        if (this.debug) console.log("rgmuii-audio._onStateChange(): "+ state);
+      }
 
       // ================================
       // AUDIO EVENTS
