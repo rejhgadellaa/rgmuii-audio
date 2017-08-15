@@ -103,9 +103,8 @@ this._setState(<link rel="import" href="../polymer/polymer-element.html">
             type: Number,
             readOnly: true,
             notify: true,
-            reflectToAttribute: true,
             observer: "_onStateChange",
-            value: -99,
+            value: -1,
           },
 
         };
@@ -117,9 +116,9 @@ this._setState(<link rel="import" href="../polymer/polymer-element.html">
       constructor() {
 
         super();
-
-        this.STATE_UNKNOWN = -99;
-        this.STATE_ERROR = -1;
+        
+        this.STATE_ERROR = -99;
+        this.STATE_UNKNOWN = -1;
         this.STATE_STOPPED = 0;
         this.STATE_PAUSED = 1;
         this.STATE_BUSY = 2;
@@ -177,12 +176,12 @@ this._setState(<link rel="import" href="../polymer/polymer-element.html">
 
       play() {
         if (this.debug) console.log("rgmuii-audio.play()");
-        if (!this._isPlaying) this.$.audio.play();
+        return this.$.audio.play();
       }
 
       pause() {
         if (this.debug) console.log("rgmuii-audio.pause()");
-        if (this._isPlaying) this.$.audio.pause();
+        return this.$.audio.pause();
       }
 
       togglePlayPause() {
