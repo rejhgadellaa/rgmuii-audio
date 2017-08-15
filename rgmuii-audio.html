@@ -268,8 +268,6 @@ this._setState(<link rel="import" href="../polymer/polymer-element.html">
       _easeInOutQuad (t) { return t<.5 ? 2*t*t : -1+(4-2*t)*t };
       _easeInOutQuart(t) { return t<.5 ? 8*t*t*t*t : 1-8*(--t)*t*t*t }
 
-
-
       // ================================
       // PRIVATE: PROPERTY OBSERVERS
 
@@ -362,6 +360,11 @@ this._setState(<link rel="import" href="../polymer/polymer-element.html">
         if (this.debug) console.log("rgmuii-audio._onSeeked()");
         this._isPlaying = false;
         this._isBusy = false;
+        if (this.$.audio.paused) {
+          this._setState(this.STATE_PAUSED);
+        } else {
+          this._setState(this.STATE_PLAYING);
+        }
       }
 
       _onSeeking(event) {
