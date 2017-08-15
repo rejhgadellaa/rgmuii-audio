@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer-element.html">
+this._setState(<link rel="import" href="../polymer/polymer-element.html">
 
 <dom-module id="rgmuii-audio">
 
@@ -101,6 +101,7 @@
 
           state: {
             type: Number,
+            readOnly: true,
             notify: true,
             reflectToAttribute: true,
             observer: "_onStateChange",
@@ -283,7 +284,7 @@
         if (this.debug) console.log("rgmuii-audio._onAbort()");
         this._isBusy = false;
         this._isPlaying = false;
-        this.state = this.STATE_STOPPED;
+        this._setState(this.STATE_STOPPED);
       }
 
       _onCanPlay(event) {
@@ -298,7 +299,7 @@
         if (this.debug) console.log("rgmuii-audio._onEnded()");
         this._isBusy = false;
         this._isPlaying = false;
-        this.state = this.STATE_STOPPED;
+        this._setState(this.STATE_STOPPED);
       }
 
       _onError(event) {
@@ -306,7 +307,7 @@
         if (this.debug) console.warn("rgmuii-audio._onError()");
         this._isBusy = false;
         this._isPlaying = false;
-        this.state = this.STATE_ERROR;
+        this._setState(this.STATE_ERROR);
 
         var error = "UNKNOWN";
         switch(event.currentTarget.error.code) {
@@ -333,23 +334,23 @@
 
       _onLoadStart(event) {
         if (this.debug) console.log("rgmuii-audio._onLoadStart()");
-        this._isPlaying = false;
-        this._isBusy = false;
-        //this.state = this.STATE_BUSY;
+        //this._isPlaying = false;
+        //this._isBusy = false;
+        //this._setState(this.STATE_BUSY);
       }
 
       _onPause(event) {
         if (this.debug) console.log("rgmuii-audio._onPause()");
         this._isBusy = false;
         this._isPlaying = false;
-        this.state = this.STATE_PAUSED;
+        this._setState(this.STATE_PAUSED);
       }
 
       _onPlaying(event) {
         if (this.debug) console.log("rgmuii-audio._onPlaying()");
         this._isBusy = false;
         this._isPlaying = true;
-        this.state = this.STATE_PLAYING;
+        this._setState(this.STATE_PLAYING);
         if (this.fade) { this.fadeIn(); }
       }
 
@@ -367,14 +368,14 @@
         if (this.debug) console.log("rgmuii-audio._onSeeking()");
         this._isPlaying = false;
         this._isBusy = true;
-        this.state = this.STATE_BUSY;
+        this._setState(this.STATE_BUSY);
       }
 
       _onWaiting(event) {
         if (this.debug) console.log("rgmuii-audio._onWaiting()");
         this._isPlaying = false;
         this._isBusy = true;
-        this.state = this.STATE_BUSY;
+        this._setState(this.STATE_BUSY);
       }
 
     }
